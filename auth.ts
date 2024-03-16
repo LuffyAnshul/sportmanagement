@@ -8,8 +8,14 @@ import { authConfig } from './auth.config';
 
 async function getUser(email: string): Promise<User | undefined> {
   try {
-    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0];
+    // const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+    const user = <User> {
+      id: '0000',
+      email: 'test@mail.com',
+      password: 'testing',
+      name: 'test'
+    }
+    return user;
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
@@ -25,17 +31,23 @@ export const { auth, signIn, signOut } = NextAuth({
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
 
+        console.log(parsedCredentials);
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
 
           const user = await getUser(email);
+
+          console.log('user => ', user)
+
           if (!user) return null;
 
-          const passwordsMatch = await bcrypt.compare(password, user.password);
+          // const passwordsMatch = await bcrypt.compare(password, user.password);
+          const passwordsMatch = true;
+          console.log('passwordsMatch => ', passwordsMatch)
           if (passwordsMatch) return user;
         }
 
-        console.log('Invalid credentials');
+        console.log('Invalid credentials test');
         return null;
       },
     }),
